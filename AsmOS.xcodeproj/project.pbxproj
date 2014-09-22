@@ -1,0 +1,180 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		F3193A0219CB6FE00057BBBD /* A20.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = A20.s; sourceTree = "<group>"; };
+		F3193A0319CB6FE00057BBBD /* boot1.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = boot1.s; sourceTree = "<group>"; };
+		F3193A0419CB6FE00057BBBD /* boot2.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = boot2.s; sourceTree = "<group>"; };
+		F3193A0519CB6FE00057BBBD /* common.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = common.s; sourceTree = "<group>"; };
+		F3193A0619CB6FE00057BBBD /* Fat12.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = Fat12.s; sourceTree = "<group>"; };
+		F3193A0719CB6FE00057BBBD /* Floppy16.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = Floppy16.s; sourceTree = "<group>"; };
+		F3193A0819CB6FE00057BBBD /* Gdt.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = Gdt.s; sourceTree = "<group>"; };
+		F3193A0919CB6FE00057BBBD /* kernel.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = kernel.s; sourceTree = "<group>"; };
+		F3193A0A19CB6FE00057BBBD /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; };
+		F3193A0C19CB6FE00057BBBD /* boot1.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = boot1.bin; sourceTree = "<group>"; };
+		F3193A0D19CB6FE00057BBBD /* kernel.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = kernel.bin; sourceTree = "<group>"; };
+		F3193A1119CB6FE00057BBBD /* dgph */ = {isa = PBXFileReference; lastKnownFileType = file; path = dgph; sourceTree = "<group>"; };
+		F3193A1219CB6FE00057BBBD /* Kernel2-all-non-framework-target-headers.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kernel2-all-non-framework-target-headers.hmap"; sourceTree = "<group>"; };
+		F3193A1319CB6FE00057BBBD /* Kernel2-all-target-headers.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kernel2-all-target-headers.hmap"; sourceTree = "<group>"; };
+		F3193A1419CB6FE00057BBBD /* Kernel2-generated-files.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kernel2-generated-files.hmap"; sourceTree = "<group>"; };
+		F3193A1519CB6FE00057BBBD /* Kernel2-own-target-headers.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kernel2-own-target-headers.hmap"; sourceTree = "<group>"; };
+		F3193A1619CB6FE00057BBBD /* Kernel2-project-headers.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Kernel2-project-headers.hmap"; sourceTree = "<group>"; };
+		F3193A1719CB6FE00057BBBD /* Kernel2.hmap */ = {isa = PBXFileReference; lastKnownFileType = file; path = Kernel2.hmap; sourceTree = "<group>"; };
+		F3193A1A19CB6FE00057BBBD /* Kernel2.LinkFileList */ = {isa = PBXFileReference; lastKnownFileType = text; path = Kernel2.LinkFileList; sourceTree = "<group>"; };
+		F3193A1B19CB6FE00057BBBD /* build.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
+		F3193A1C19CB6FE00057BBBD /* run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		F3193A1D19CB6FE00057BBBD /* sfk */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = sfk; sourceTree = "<group>"; };
+		F3193A1E19CB79300057BBBD /* KeyMap.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = KeyMap.s; sourceTree = "<group>"; };
+		F35C229E19CD633F002F25B0 /* terminal.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = terminal.s; sourceTree = "<group>"; };
+		F376D67419CC891400D8CC2E /* string.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = string.s; sourceTree = "<group>"; };
+		F3B9615219CF67F3000BC2FA /* maths.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = maths.s; sourceTree = "<group>"; };
+		F3B9615319CF7CEA000BC2FA /* backup.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = backup.txt; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		F31939FA19CB6FB10057BBBD = {
+			isa = PBXGroup;
+			children = (
+				F3B9615319CF7CEA000BC2FA /* backup.txt */,
+				F3193A0119CB6FE00057BBBD /* asm */,
+				F3193A0B19CB6FE00057BBBD /* bin */,
+				F3193A1B19CB6FE00057BBBD /* build.sh */,
+				F3193A1C19CB6FE00057BBBD /* run.sh */,
+				F3193A1D19CB6FE00057BBBD /* sfk */,
+			);
+			sourceTree = "<group>";
+		};
+		F3193A0119CB6FE00057BBBD /* asm */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A0219CB6FE00057BBBD /* A20.s */,
+				F3193A0319CB6FE00057BBBD /* boot1.s */,
+				F3193A0419CB6FE00057BBBD /* boot2.s */,
+				F3193A0519CB6FE00057BBBD /* common.s */,
+				F3193A0619CB6FE00057BBBD /* Fat12.s */,
+				F3193A0719CB6FE00057BBBD /* Floppy16.s */,
+				F3193A0819CB6FE00057BBBD /* Gdt.s */,
+				F3193A0919CB6FE00057BBBD /* kernel.s */,
+				F3193A0A19CB6FE00057BBBD /* stdio.s */,
+				F3193A1E19CB79300057BBBD /* KeyMap.s */,
+				F376D67419CC891400D8CC2E /* string.s */,
+				F35C229E19CD633F002F25B0 /* terminal.s */,
+				F3B9615219CF67F3000BC2FA /* maths.s */,
+			);
+			path = asm;
+			sourceTree = "<group>";
+		};
+		F3193A0B19CB6FE00057BBBD /* bin */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A0C19CB6FE00057BBBD /* boot1.bin */,
+				F3193A0D19CB6FE00057BBBD /* kernel.bin */,
+				F3193A0E19CB6FE00057BBBD /* Kernel2.build */,
+			);
+			path = bin;
+			sourceTree = "<group>";
+		};
+		F3193A0E19CB6FE00057BBBD /* Kernel2.build */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A0F19CB6FE00057BBBD /* Debug */,
+			);
+			path = Kernel2.build;
+			sourceTree = "<group>";
+		};
+		F3193A0F19CB6FE00057BBBD /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A1019CB6FE00057BBBD /* Kernel2.build */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		F3193A1019CB6FE00057BBBD /* Kernel2.build */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A1119CB6FE00057BBBD /* dgph */,
+				F3193A1219CB6FE00057BBBD /* Kernel2-all-non-framework-target-headers.hmap */,
+				F3193A1319CB6FE00057BBBD /* Kernel2-all-target-headers.hmap */,
+				F3193A1419CB6FE00057BBBD /* Kernel2-generated-files.hmap */,
+				F3193A1519CB6FE00057BBBD /* Kernel2-own-target-headers.hmap */,
+				F3193A1619CB6FE00057BBBD /* Kernel2-project-headers.hmap */,
+				F3193A1719CB6FE00057BBBD /* Kernel2.hmap */,
+				F3193A1819CB6FE00057BBBD /* Objects-normal */,
+			);
+			path = Kernel2.build;
+			sourceTree = "<group>";
+		};
+		F3193A1819CB6FE00057BBBD /* Objects-normal */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A1919CB6FE00057BBBD /* x86_64 */,
+			);
+			path = "Objects-normal";
+			sourceTree = "<group>";
+		};
+		F3193A1919CB6FE00057BBBD /* x86_64 */ = {
+			isa = PBXGroup;
+			children = (
+				F3193A1A19CB6FE00057BBBD /* Kernel2.LinkFileList */,
+			);
+			path = x86_64;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		F31939FB19CB6FB10057BBBD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+			};
+			buildConfigurationList = F31939FE19CB6FB10057BBBD /* Build configuration list for PBXProject "AsmOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F31939FA19CB6FB10057BBBD;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		F31939FF19CB6FB10057BBBD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		F3193A0019CB6FB10057BBBD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F31939FE19CB6FB10057BBBD /* Build configuration list for PBXProject "AsmOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F31939FF19CB6FB10057BBBD /* Debug */,
+				F3193A0019CB6FB10057BBBD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F31939FB19CB6FB10057BBBD /* Project object */;
+}

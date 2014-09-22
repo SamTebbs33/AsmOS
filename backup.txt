@@ -1,0 +1,35 @@
+; Print CPU Identifier
+
+xor eax, eax
+cpuid
+call PutCh
+shr ebx, 8
+call PutCh
+shr ebx, 8
+call PutCh
+shr ebx, 8
+call PutCh
+mov bl, dl
+call PutCh
+shr edx, 8
+mov bl, dl
+call PutCh
+shr edx, 8
+mov bl, dl
+call PutCh
+shr edx, 8
+mov bl, dl
+call PutCh
+mov bl, cl
+call PutCh
+shr ecx, 8
+mov bl, cl
+call PutCh
+shr ecx, 8
+mov bl, cl
+call PutCh
+shr ecx, 8
+mov bl, cl
+call PutCh
+
+call PutL
