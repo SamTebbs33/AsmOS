@@ -20,12 +20,14 @@ MsgDumpSpacing3: db "  ", 0x00
 
 MsgCPUBrand: db "CPU ID:",0x00
 
+FileName: db "file.txt",0x00
+
 ComClear: db "clear", 0x00
     ComClearDesc: db "Clears the screen", 0x00
 ComHelp: db "help", 0x00
     ComHelpDesc: db "Prints the help message", 0x00
 ComEcho: db "echo", 0x00
-    ComEchoDesc: db "Prints the last command used", 0x00
+    ComEchoDesc: db "Prints the argument", 0x00
 ComRestart: db "restart", 0x00
     ComRestartDesc: db "Reboot the OS", 0x00
 ComVer: db "ver", 0x00
@@ -37,9 +39,7 @@ ComCol: db "col", 0x00
 ComBkg: db "bkg", 0x00
     ComBkgDesc: db "Cycle through the background colours", 0x00
 ComDump: db "dump", 0x00
-    ComDumpDesc: db "Prints next 255 ram locations from mem pointer, then increments it", 0x00
-ComReset: db "reset", 0x00
-    ComResetDesc: db "Resets the mem pointer", 0x00
+    ComDumpDesc: db "Prints next 256 ram locations after the argument", 0x00
 ComScroll: db "scroll", 0x00
     ComScrollDesc: db "Scrolls the screen downwards", 0x00
 ComRand: db "rand", 0x00
@@ -47,20 +47,41 @@ ComRand: db "rand", 0x00
 ComSys: db "sys", 0x00
     ComSysDesc: db "Prints information about the system", 0x00
 
+;**************************************************;
+; Macros
+;**************************************************;
+
+; doCommand(commandStr, function)
+%macro doCommand 2
+    mov esi, %1
+    call StrCmp
+    jc near %2
+%endmacro
+
+; doHelp(comName, comDesc)
+%macro doHelp 2
+    mov esi, %1
+    mov edi, %2
+    call .printComHelp
+    call PutL
+%endmacro
+
+%macro getArgI 1
+    getArg %1
+    call StrToInt
+%endmacro
+
+%macro getArg 1
+    mov eax, %1
+    call GetArg
+%endmacro
+
 terminal:
     call InitSeed
-    mov	dl, [COLOUR_WHITE]
-	mov	al, [COLOUR_LBLUE]
-	call	SetColour
-	call	ClrScr
-    mov ebx, MsgWelcome
-    call PutS
-    mov ebx, MsgVersion
-    call PutS
-    call PutL
-    mov eax, dword [0xB02]
-    call PutI
-    call PutL
+    setColourClr [COLOUR_WHITE], [COLOUR_LBLUE]
+    print MsgWelcome
+    println MsgVersion
+    printlnI dword [0xB02]
     call PrintPrompt
     xor ax, ax
     xor bx, bx
@@ -116,67 +137,31 @@ InputLoop:
     cmp byte [edi], 0       ; if no text was entered, jump back
     je near .finishCom
     call StrTrim
-    call StrLower           ; removes all trailing spaces and coverts the command to lowercase
-                            ; so that even commands in uppercase are recognised
-    mov esi, ComClear
-    call StrCmp
-    jc near .comClear
+    mov bl, ' '
+    call StrSplit           ; split command by spaces
+    mov edi, SplitStrs      ; move the first split string to edi
 
-    mov esi, ComHelp
-    call StrCmp
-    jc near .comHelp
-
-    mov esi, ComEcho
-    call StrCmp
-    jc near .comEcho
-
-    mov esi, ComRestart
-    call StrCmp
-    jc near .comRestart
-
-    mov esi, ComVer
-    call StrCmp
-    jc near .comVer
-
-    mov esi, ComColours
-    call StrCmp
-    jc near .comColours
-
-    mov esi, ComCol
-    call StrCmp
-    jc near .comCol
-
-    mov esi, ComBkg
-    call StrCmp
-    jc near .comBkg
-
-    mov esi, ComDump
-    call StrCmp
-    jc near .comDump
-
-    mov esi, ComReset
-    call StrCmp
-    jc near .comReset
-
-    mov esi, ComScroll
-    call StrCmp
-    jc near .comScroll
-
-    mov esi, ComRand
-    call StrCmp
-    jc near .comRand
-
-    mov esi, ComSys
-    call StrCmp
-    jc near .comSys
+    doCommand ComClear, .comClear
+    doCommand ComHelp, .comHelp
+    doCommand ComEcho, .comEcho
+    doCommand ComRestart, .comRestart
+    doCommand ComVer, .comVer
+    doCommand ComColours, .comColours
+    doCommand ComCol, .comCol
+    doCommand ComBkg, .comBkg
+    doCommand ComDump, .comDump
+    doCommand ComScroll, .comScroll
+    doCommand ComRand, .comRand
+    doCommand ComSys, .comSys
 
     mov ebx, MsgInvalidCom
     call PutS
-    mov ebx, ComBuffer
+    mov ebx, SplitStrs
     call PutS
     jmp .finishCom
 
 .finishCom
+    call ClearSplitStrs
     mov edi, LastCom
     mov esi, ComBuffer
     call StrClear           ; clears the previous command
@@ -193,87 +178,24 @@ InputLoop:
     jmp .finishCom
 
 .comHelp:
-    mov esi, ComClear
-    mov edi, ComClearDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComHelp
-    mov edi, ComHelpDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComEcho
-    mov edi, ComEchoDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComRestart
-    mov edi, ComRestartDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComVer
-    mov edi, ComVerDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComColours
-    mov edi, ComColoursDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComCol
-    mov edi, ComColDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComBkg
-    mov edi, ComBkgDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComDump
-    mov edi, ComDumpDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComReset
-    mov edi, ComResetDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComScroll
-    mov edi, ComScrollDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComRand
-    mov edi, ComRandDesc
-    call .printComHelp
-
-    call PutL
-
-    mov esi, ComSys
-    mov edi, ComSysDesc
-    call .printComHelp
+    doHelp ComClear, ComClearDesc
+    doHelp ComHelp, ComHelpDesc
+    doHelp ComEcho, ComEchoDesc
+    doHelp ComRestart, ComRestartDesc
+    doHelp ComVer, ComVerDesc
+    doHelp ComColours, ComColoursDesc
+    doHelp ComCol, ComColDesc
+    doHelp ComBkg, ComBkgDesc
+    doHelp ComDump, ComDumpDesc
+    doHelp ComScroll, ComScrollDesc
+    doHelp ComRand, ComRandDesc
+    doHelp ComSys, ComSysDesc
 
     jmp .finishCom
 
 .comEcho:
-    mov ebx, LastCom
-    call PutS
+    getArg 1
+    print edi
     jmp .finishCom
 
 .comRestart:
@@ -281,76 +203,57 @@ InputLoop:
 	out        64h, al
 
 .comVer:
-    mov ebx, MsgVersion
-    call PutS
+    print MsgVersion
     jmp .finishCom
 
 .comColours:
     xor eax, eax
-    mov ebx, MsgText
-    call PutS
-    mov al, byte [ColChar]
-    call PutHex
-    call PutL
-    mov ebx, MsgBkg
-    call PutS
-    mov al, byte [ColBkg]
-    call PutHex
+    print MsgText
+    printlnH byte [ColChar]
+    print MsgBkg
+    printH byte [ColBkg]
     jmp .finishCom
 
 .comCol:
     mov dl, byte [ColChar]
     inc dl
     and dl, 15
-    mov al, byte [ColBkg]
-    call SetColour
-    call ClrScr
+    setColourClr dl, byte [ColBkg]
     jmp .finishCom
 
 .comBkg:
     mov al, byte [ColBkg]
     inc al
     and al, 15
-    mov dl, byte [ColChar]
-    call SetColour
-    call ClrScr
+    setColourClr byte [ColChar], al
     jmp .finishCom
 
 .comDump:
-    xor eax, eax
+    getArgI 1
     xor edx, edx
-    mov al, byte [MemPtr]      ; al = start address / 16
-    mov cl, 225
-    mul cl                     ; ax = start address
-    mov ebx, MsgDumpStart
-    call PutS
-    call PutI                  ; print start address
-    call PutL
+    print MsgDumpStart
+    printlnI eax                ; print start address
     xor ecx, ecx                ; cl = horisontal address, ch = vertical address
-    push ax
-    xor ax, ax
-    mov ebx, MsgDumpSpacing1
-    call PutS
+    push eax
+    xor eax, eax
+    print MsgDumpSpacing1
     .loop1:                     ; loop to print the horisontal hex addresses
-        mov ebx, MsgHex
-        call PutS
+        print MsgHex
         call PutHexDigit
-        mov ebx, MsgDumpSpacing2
-        call PutS
+        print MsgDumpSpacing2
         inc al
         cmp al, 16
         jl .loop1
-        pop ax
+        pop eax
     .loop2:                     ; vertical loop
         call PutL
         xor cl, cl              ; resets the x position
-        push ax
+        push eax
         mov al, ch
         call PutHex
         add ch, 16
-        pop ax
-        mov ebx, MsgDumpSpacing2
-        call PutS
+        pop eax
+        print MsgDumpSpacing2
         .loop3:                 ; horisontal loop
             mov dl, byte [eax]
             push eax
@@ -365,24 +268,23 @@ InputLoop:
             inc cl              ; increase the address and the x position
             cmp cl, 16
             je .loop3Done       ; if we are at the end of the horistontal address, end the horisontal loop
-            mov ebx, MsgDumpSpacing3
-            call PutS
+            print MsgDumpSpacing3
             jmp .loop3
         .loop3Done
             cmp ch, 0           ; if the y position has overflown (255 + 1 = 0), finish the command
             je .finish
             jmp .loop2
     .finish:
-        inc byte [MemPtr]       ; increment the mem pointer
         jmp .finishCom
 
-.comReset:
-    mov byte [MemPtr], 0
-    jmp .finishCom
-
 .comScroll:
-    call Scroll
-    jmp .finishCom
+    getArgI 1
+    .loop:
+        call Scroll
+        cmp eax, 0
+        je .finishCom
+        dec eax
+        jmp .loop
 
 .comRand:
     call RandInt
@@ -394,8 +296,7 @@ InputLoop:
     mov eax, 0x0
     xor ecx, ecx
     xor edx, edx
-    mov ebx, MsgCPUBrand
-    call PutS
+    print MsgCPUBrand
     xor ebx, ebx
     ; print brand string
     mov eax, 80000002h
@@ -411,12 +312,9 @@ InputLoop:
     jmp .finishCom
 
 .printComHelp:
-    mov ebx, esi
-    call PutS
-    mov ebx, MsgComDesc
-    call PutS
-    mov ebx, edi
-    call PutS
+    print esi
+    print MsgComDesc
+    print edi
     ret
 
 PrintCPUId:
@@ -424,16 +322,40 @@ PrintCPUId:
     mov dword [SysInfoBuffer+4], ebx
     mov dword [SysInfoBuffer+8], ecx
     mov dword [SysInfoBuffer+12], edx
-    mov ebx, SysInfoBuffer
-    call PutS
+    print SysInfoBuffer
     ret
 
 PrintPrompt:
     pusha
-    mov ebx, Prompt
-    call PutS
+    print Prompt
     popa
     ret
+
+; eax = arg number (max 127)
+; returns edi = argument
+GetArg:
+    pusha
+    cmp byte [SplitStrsLen+eax], 0
+    je .return
+    xor ebx, ebx                    ; sum
+    xor ecx, ecx                    ; counter
+    xor edx, edx
+    .loop:
+        mov dl, byte [SplitStrsLen+ecx]
+        add ebx, edx
+        inc ecx
+        cmp ecx, eax
+        jl .loop
+    .done:
+        mov ecx, SplitStrs
+        add ecx, eax
+        add ecx, ebx
+        mov dword [ArgAddr], ecx
+    .return:
+        popa
+        mov edi, dword [ArgAddr]
+        mov dword [ArgAddr], 0
+        ret
 
 ; eax = 1 if supported
 CpuIdSupported:
@@ -457,6 +379,7 @@ times 255 db 0
 LastCom: db 0
 times 255 db 0
 ComPtr: db 1
-MemPtr: db 0
 SysInfoBuffer: db 0
 times 16 db 0
+ArgAddr: db 0
+times 3 db 0

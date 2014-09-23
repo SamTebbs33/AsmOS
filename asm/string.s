@@ -23,12 +23,18 @@
 ;       - Converts the string to lower case
 ;	* StrUpper(str edi)
 ;       - Converts the string to upper case
+;	* StrSplit(str edi, char bl)
+;       - Splits the string by the char
+;       - Stores resulting lengths in SplitStrsLen
+;       - Stores resulting strings in SplitStrs
 ;--------------------------------------------------;
 
 ;**************************************************;
 ;   StrCmp(str1 esi, str2 edi) -> carry
 ;   Checks if the two strings are equal
 ;**************************************************;
+
+MsgIs: db "Is", 0x00
 
 StrCmp:
     xor edx, edx
@@ -249,3 +255,97 @@ StrUpper:
     .done:
         popa
         ret
+
+;**************************************************;
+;	StrSplit(str edi, char bl)
+;   Splits the string by the char and returns the 
+;   results in SplitStrs and their lengths in SplitStrsLen
+;   For example, when splitting "hello there sam" by " "
+;   StrSplit = "h", "e", "l", "l", "o", 0, "t", "h", "e", "r", "e", 0, "s", "a", "m"
+;   StrSplitLen = 5, 5, 3
+;   Delimiters inside speech marks are ingnored
+;**************************************************;
+
+StrSplit:
+    pusha
+    xor al, al              ; al = len (current lenngth of split string)
+    xor ah, ah              ; ah = num (current number of split strings)
+    xor ecx, ecx            ; ch = [edi] (current char)
+                            ; cl = c (counter)
+    mov edx, SplitStrs       ; edx = mem (address to store at)
+    mov esi, SplitStrsLen    ; esi = memLen (address to store lengths at)
+    mov bh, 0xFF               ; bh = add (determines if a string should be added)
+    .loop:
+        mov ch, byte [edi]  ; if at the end of the string, return
+        cmp ch, 0
+        je .done
+
+        cmp ch, bl          ; if ch == bl
+        jne .noSplit        ; else jump ahead
+
+        cmp bh, 0xFF        ; if bh == FF
+        jne .addToStr        ; else jump ahead
+
+        mov byte [esi], al  ; store string length
+        mov al, 0
+        inc esi             ; increment memLen pointer so it points to the location at which to put lengths
+        inc ah              ; increase number
+        mov byte [edx], 0   ; end current string
+        inc edx             ; increment memory pointer
+        jmp .incLoop
+
+    .noSplit:
+        cmp ch, '"'
+        jne .addToStr
+        not bh
+        jmp .incLoop
+    .addToStr:
+        mov byte [edx], ch  ; add char to current string
+        inc edx             ; increment memory pointer
+        inc al
+        cmp bh, 0xFF
+    .incLoop:
+        inc cl
+        cmp cl, 254         ; if current counter exceeds max string length, return
+        je .done
+        inc edi
+        jmp .loop
+    .done:
+        mov byte [esi], al  ; store new length
+        mov byte [edx], 0   ; end current string
+        popa
+        ret
+
+StrToInt:
+    xor eax, eax
+    push ecx
+    .loop:
+        movzx ecx, byte [edi]
+        inc edi
+        cmp ecx, '0'
+        jb .done
+        cmp ecx, '9'
+        ja .done
+        sub ecx, '0'
+        imul eax, 10
+        add eax, ecx
+        jmp .loop
+    .done:
+        pop ecx
+        ret
+
+ClearSplitStrs:
+    pusha
+    cld
+    mov edi, SplitStrsLen
+    mov cx, 382
+    mov al, 0
+    repne stosb
+    popa
+    ret
+
+SplitStrsLen: db 0
+times 127 db 0
+SplitStrs: db 0
+times 254 db 0
+

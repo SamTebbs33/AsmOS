@@ -60,6 +60,74 @@ COLOUR_WHITE: db 0x0F
 MsgHex: db "0x",0x00
 
 ;**************************************************;
+; Macros
+;**************************************************;
+
+; print(str)
+%macro print 1
+    mov ebx, %1
+    call PutS
+%endmacro
+
+; println(str)
+%macro println 1
+    print %1
+    call PutL
+%endmacro
+
+; printC(char)
+%macro printC 1
+    mov bl, %1
+    call PutCh
+%endmacro
+
+; printlnC(char)
+%macro printlnC 1
+    printC %1
+    call PutL
+%endmacro
+
+; printI(int)
+%macro printI 1
+    mov eax, %1
+    call PutI
+%endmacro
+
+; printlnI(int)
+%macro printlnI 1
+    printI %1
+    call PutL
+%endmacro
+
+; printH(int)
+%macro printH 1
+    mov al, %1
+    call PutHex
+%endmacro
+
+; printlnH(int)
+%macro printlnH 1
+    printH %1
+    call PutL
+%endmacro
+
+; setColour(text, background)
+%macro setColour 2
+    mov al, %2
+    mov dl, %1
+    call SetColour
+%endmacro
+
+; setColourClr(text, background)
+%macro setColourClr 2
+    mov al, %2
+    mov dl, %1
+    call SetColour
+    call ClrScr
+%endmacro
+
+
+;**************************************************;
 ;	Putch32 ()
 ;		- Prints a character to screen
 ;	BL => Character to print
@@ -166,8 +234,7 @@ PutCh:
 ;**************************************************;
 
 PutL:
-	mov bl, 0x0A
-	call PutCh
+    printC 0x0A
 	ret
 
 ;**************************************************;
@@ -242,22 +309,21 @@ PutS:
 
 PutI:
     pusha
-    mov cx, 0
-    mov bx, 10
+    mov ecx, 0
+    mov ebx, 10
     .loop:
-        mov dx, 0
-        div bx
-        push ax
+        mov edx, 0
+        div ebx
+        push eax
         add dl, 48
-        pop ax
-        push dx
-        inc cx
-        cmp ax, 0
+        pop eax
+        push edx
+        inc ecx
+        cmp eax, 0
         jnz .loop
     .loop2:
-        pop dx
-        mov bl, dl
-        call PutCh
+        pop edx
+        printC dl
         loop .loop2
         popa
         ret
@@ -273,8 +339,7 @@ PutHexDigit:
     .less:
         add al, 48
     .put:
-        mov bl, al
-        call PutCh
+        printC al
         popa
         ret
 
@@ -457,8 +522,7 @@ BackSpace:
     sub bl, 1
     mov bh, byte [PutY]
     call GotoXY
-    mov bl, 0
-    call PutCh
+    printC 0
     mov bl, byte [PutX]
     sub bl, 1
     mov bh, byte [PutY]
