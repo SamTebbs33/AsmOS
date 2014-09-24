@@ -13,14 +13,19 @@ bits	32				; 32 bit code
 
 jmp	Entry				; jump to entry point
 
+Ram: dd 0
+
 %include "terminal.s"
+%include "sysinfo.s"
 
 Entry:
 
 	;-------------------------------;
-	;   Set registers		;
+	;   Set registers
 	;-------------------------------;
 
+    mov eax, [edx + BootInfo.ram]
+    mov dword [Ram], eax
 	mov	ax, 0x10		; set data segments to data selector (0x10)
 	mov	ds, ax
 	mov	ss, ax
@@ -28,7 +33,7 @@ Entry:
 	mov	esp, 90000h		; stack begins from 90000h
 
 	;---------------------------------------;
-	;   Clear screen and print success	;
+	;   Jump to terminal
 	;---------------------------------------;
 
 	mov 	eax, 0
@@ -36,10 +41,11 @@ Entry:
 	call terminal
 
 	;---------------------------------------;
-	;   Stop execution			;
+	;   Stop execution
 	;---------------------------------------;
 
 	cli
 	hlt
-    
-StrBuff: db 0x0A, "> ",0x00
+
+AllocPtr: dd 0   ; points to the next free section of memory
+MemAlloc: db 0      ; dynamic memory allocation occurs from here until 0xB7FFE

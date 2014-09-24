@@ -3,6 +3,7 @@ jmp terminal
 %include "stdio.s"
 %include "string.s"
 %include "maths.s"
+%include "Files.s"
 
 MsgWelcome: db 0x0A,"Sam's OS ",0x00
 MsgVersion: db "v0.1",0x00
@@ -19,8 +20,6 @@ MsgDumpSpacing2: db " ", 0x00
 MsgDumpSpacing3: db "  ", 0x00
 
 MsgCPUBrand: db "CPU ID:",0x00
-
-FileName: db "file.txt",0x00
 
 ComClear: db "clear", 0x00
     ComClearDesc: db "Clears the screen", 0x00
@@ -46,6 +45,8 @@ ComRand: db "rand", 0x00
     ComRandDesc: db "Prints a random number", 0x00
 ComSys: db "sys", 0x00
     ComSysDesc: db "Prints information about the system", 0x00
+ComLs: db "ls", 0x00
+    ComLsDesc: db "List the contents of the current directory", 0x00
 
 ;**************************************************;
 ; Macros
@@ -76,12 +77,20 @@ ComSys: db "sys", 0x00
     call GetArg
 %endmacro
 
+%macro checkArgNum 1
+    mov al, %1
+    call CheckArgNum
+%endmacro
+
+;**************************************************;
+; Main program
+;**************************************************;
+
 terminal:
     call InitSeed
     setColourClr [COLOUR_WHITE], [COLOUR_LBLUE]
     print MsgWelcome
     println MsgVersion
-    printlnI dword [0xB02]
     call PrintPrompt
     xor ax, ax
     xor bx, bx
@@ -153,6 +162,7 @@ InputLoop:
     doCommand ComScroll, .comScroll
     doCommand ComRand, .comRand
     doCommand ComSys, .comSys
+    doCommand ComFile, .comFile
 
     mov ebx, MsgInvalidCom
     call PutS
@@ -190,10 +200,13 @@ InputLoop:
     doHelp ComScroll, ComScrollDesc
     doHelp ComRand, ComRandDesc
     doHelp ComSys, ComSysDesc
+    doHelp ComFile, ComFileDesc
 
     jmp .finishCom
 
 .comEcho:
+    checkArgNum 1
+    jnc .finishCom
     getArg 1
     print edi
     jmp .finishCom
@@ -311,6 +324,11 @@ InputLoop:
     popa
     jmp .finishCom
 
+.comFile:
+    mov ebx, RootDirBuffer
+    call LoadRootDir
+    print8 RootDirBuffer
+
 .printComHelp:
     print esi
     print MsgComDesc
@@ -334,7 +352,9 @@ PrintPrompt:
 ; eax = arg number (max 127)
 ; returns edi = argument
 GetArg:
-    pusha
+    push ebx
+    push ecx
+    push edx
     cmp byte [SplitStrsLen+eax], 0
     je .return
     xor ebx, ebx                    ; sum
@@ -350,11 +370,21 @@ GetArg:
         mov ecx, SplitStrs
         add ecx, eax
         add ecx, ebx
-        mov dword [ArgAddr], ecx
+        mov edi, ecx
     .return:
-        popa
-        mov edi, dword [ArgAddr]
-        mov dword [ArgAddr], 0
+        pop edx
+        pop ecx
+        pop ebx
+        ret
+
+; al = number of args
+; carry = number of args found
+CheckArgNum:
+    clc
+    cmp byte [SplitStrsNum], al
+    jne .done
+    stc
+    .done:
         ret
 
 ; eax = 1 if supported
@@ -383,3 +413,5 @@ SysInfoBuffer: db 0
 times 16 db 0
 ArgAddr: db 0
 times 3 db 0
+RootDirBuffer: times 7168 db 0      ; root dir is 14 secctos * 512 bytes long
+FileBuffer: times 1025 db 0

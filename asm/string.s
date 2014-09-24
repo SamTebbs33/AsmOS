@@ -27,14 +27,16 @@
 ;       - Splits the string by the char
 ;       - Stores resulting lengths in SplitStrsLen
 ;       - Stores resulting strings in SplitStrs
+;	* StrToInt(str edi) -> int eax
+;       - Converts the string to an integer
+;	* StrCharIndex(str edi, char bl) -> index eax
+;       - Returns the index of the character, or 255 if it wasn't found
 ;--------------------------------------------------;
 
 ;**************************************************;
 ;   StrCmp(str1 esi, str2 edi) -> carry
 ;   Checks if the two strings are equal
 ;**************************************************;
-
-MsgIs: db "Is", 0x00
 
 StrCmp:
     xor edx, edx
@@ -272,6 +274,7 @@ StrSplit:
     xor ah, ah              ; ah = num (current number of split strings)
     xor ecx, ecx            ; ch = [edi] (current char)
                             ; cl = c (counter)
+    mov byte [SplitStrsNum], 0
     mov edx, SplitStrs       ; edx = mem (address to store at)
     mov esi, SplitStrsLen    ; esi = memLen (address to store lengths at)
     mov bh, 0xFF               ; bh = add (determines if a string should be added)
@@ -311,11 +314,16 @@ StrSplit:
         inc edi
         jmp .loop
     .done:
+        mov [SplitStrsNum], ah
         mov byte [esi], al  ; store new length
         mov byte [edx], 0   ; end current string
         popa
         ret
 
+;**************************************************;
+;	StrToInt(str edi) -> int eax
+;   Converts the string to an integer
+;**************************************************;
 StrToInt:
     xor eax, eax
     push ecx
@@ -334,9 +342,34 @@ StrToInt:
         pop ecx
         ret
 
+;**************************************************;
+;	StrCharIndex(str edi, char bl) -> eax
+;   Returns the index of the character, or 255 if it wasn't found
+;**************************************************;
+StrCharIndex:
+    push bx
+    xor ecx, ecx
+    .loop:
+        mov bh, byte [edi+ecx]
+        cmp bh, 0
+        je .notFound
+        cmp bh, bl
+        je .found
+        inc ecx
+        jmp .loop
+    .notFound:
+        mov eax, 255
+        jmp .done
+    .found:
+        mov eax, ecx
+    .done:
+        pop bx
+        ret
+
 ClearSplitStrs:
     pusha
     cld
+    mov byte [SplitStrsNum], 0
     mov edi, SplitStrsLen
     mov cx, 382
     mov al, 0
@@ -344,6 +377,7 @@ ClearSplitStrs:
     popa
     ret
 
+SplitStrsNum: db 0
 SplitStrsLen: db 0
 times 127 db 0
 SplitStrs: db 0

@@ -27,6 +27,7 @@ jmp	main				; go to start
 %include "A20.s"			; A20 enabling
 %include "Fat12.s"			; FAT12 driver. Kinda :)
 %include "common.s"
+%include "sysinfo.s"
 
 ;*******************************************************
 ;	Data Section
@@ -36,6 +37,9 @@ LoadingMsg db 0x0D, 0x0A, "Searching for Operating System...", 0x00
 msgFailure db 0x0D, 0x0A, "*** FATAL: MISSING OR CURRUPT KRNL.SYS. Press Any Key to Reboot", 0x0D, 0x0A, 0x0A, 0x00
 Ram: db 0
 times 3 db 0
+struc bootinfo: istruc BootInfo
+    at ram, dd 0
+iend
 
 ;*******************************************************
 ;	STAGE 2 ENTRY POINT
@@ -64,7 +68,7 @@ main:
     push eax
     xor eax, eax
     int 0x12
-    mov dword [Ram], eax
+    mov [bootinfo + BootInfo.ram], eax
     pop eax
 
 	;-------------------------------;
@@ -78,13 +82,6 @@ main:
 	;-------------------------------;
 
 	call	EnableA20_KKbrd_Out
-
-	;-------------------------------;
-	;   Print loading message	;
-	;-------------------------------;
-
-	mov	si, LoadingMsg
-	;call	Puts16
 
         ;-------------------------------;
         ; Initialize filesystem		;
@@ -104,7 +101,6 @@ main:
 	cmp	ax, 0			; Test for success
 	je	EnterStage3		; yep--onto Stage 3!
 	mov	si, msgFailure		; Nope--print error
-	;call	Puts16
 	mov	ah, 0
 	int     0x16                    ; await keypress
 	int     0x19                    ; warm boot computer
@@ -122,7 +118,7 @@ EnterStage3:
 	mov	eax, cr0		; set bit 0 in cr0--enter pmode
 	or	eax, 1
 	mov	cr0, eax
-
+    mov edx, bootinfo
 	jmp	CODE_DESC:Stage3	; far jump to fix CS. Remember that the code selector is 0x8!
 
 	; Note: Do NOT re-enable interrupts! Doing so will triple fault!

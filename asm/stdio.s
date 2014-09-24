@@ -111,6 +111,13 @@ MsgHex: db "0x",0x00
     call PutL
 %endmacro
 
+%macro print8 1
+    pusha
+    mov ecx, 7
+    .loop:
+        
+%endmacro
+
 ; setColour(text, background)
 %macro setColour 2
     mov al, %2
@@ -220,7 +227,6 @@ PutCh:
     cmp bl, 0x00
     je .done2
     call MoveCur
-	jmp .done2
 .done2:
     popa
     ret
