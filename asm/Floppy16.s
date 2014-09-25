@@ -77,7 +77,7 @@ LBACHS:
 ;************************************************;
 ; Reads a series of sectors
 ; CX=>Number of sectors to read
-; AX=>Starting sector
+; AX=>Starting sector   ; asking for sector 0 is illegal
 ; ES:EBX=>Buffer to read to
 ;************************************************;
 

@@ -1,10 +1,9 @@
-
-%include "Floppy16.s"
+%include "Floppy32.s"
 
 ; ebx = buffer address
 LoadRootDir:
     mov cx, 14
     mov ax, 13
-    xor es, es
-    call ReadSectors
+    xor esi, esi
+    ;call ReadSectors
     ret

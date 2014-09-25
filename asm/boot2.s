@@ -27,7 +27,7 @@ jmp	main				; go to start
 %include "A20.s"			; A20 enabling
 %include "Fat12.s"			; FAT12 driver. Kinda :)
 %include "common.s"
-%include "sysinfo.s"
+;%include "sysinfo.s"
 
 ;*******************************************************
 ;	Data Section
@@ -37,9 +37,9 @@ LoadingMsg db 0x0D, 0x0A, "Searching for Operating System...", 0x00
 msgFailure db 0x0D, 0x0A, "*** FATAL: MISSING OR CURRUPT KRNL.SYS. Press Any Key to Reboot", 0x0D, 0x0A, 0x0A, 0x00
 Ram: db 0
 times 3 db 0
-struc bootinfo: istruc BootInfo
-    at ram, dd 0
-iend
+;istruc BootInfo
+ ;   at ram dd 0
+;iend
 
 ;*******************************************************
 ;	STAGE 2 ENTRY POINT
@@ -65,11 +65,11 @@ main:
 	mov	sp, 0xFFFF
 	sti				; enable interrupts
 
-    push eax
-    xor eax, eax
-    int 0x12
-    mov [bootinfo + BootInfo.ram], eax
-    pop eax
+    ;push eax
+    ;xor eax, eax
+    ;int 0x12
+    ;mov [bootinfo + BootInfo.ram], eax
+    ;pop eax
 
 	;-------------------------------;
 	;   Install our GDT		;
@@ -118,7 +118,7 @@ EnterStage3:
 	mov	eax, cr0		; set bit 0 in cr0--enter pmode
 	or	eax, 1
 	mov	cr0, eax
-    mov edx, bootinfo
+    ;mov edx, bootinfo
 	jmp	CODE_DESC:Stage3	; far jump to fix CS. Remember that the code selector is 0x8!
 
 	; Note: Do NOT re-enable interrupts! Doing so will triple fault!

@@ -45,8 +45,10 @@ ComRand: db "rand", 0x00
     ComRandDesc: db "Prints a random number", 0x00
 ComSys: db "sys", 0x00
     ComSysDesc: db "Prints information about the system", 0x00
-ComLs: db "ls", 0x00
-    ComLsDesc: db "List the contents of the current directory", 0x00
+ComDir: db "ls", 0x00
+    ComDirDesc: db "List the contents of the current directory", 0x00
+ComTest: db "test", 0x00
+    ComTestDesc: db "Does some test related shizzle", 0x00
 
 ;**************************************************;
 ; Macros
@@ -162,7 +164,8 @@ InputLoop:
     doCommand ComScroll, .comScroll
     doCommand ComRand, .comRand
     doCommand ComSys, .comSys
-    doCommand ComFile, .comFile
+    doCommand ComDir, .comDir
+    doCommand ComTest, .comTest
 
     mov ebx, MsgInvalidCom
     call PutS
@@ -200,7 +203,7 @@ InputLoop:
     doHelp ComScroll, ComScrollDesc
     doHelp ComRand, ComRandDesc
     doHelp ComSys, ComSysDesc
-    doHelp ComFile, ComFileDesc
+    doHelp ComDir, ComDirDesc
 
     jmp .finishCom
 
@@ -324,10 +327,13 @@ InputLoop:
     popa
     jmp .finishCom
 
-.comFile:
+.comDir:
     mov ebx, RootDirBuffer
     call LoadRootDir
-    print8 RootDirBuffer
+    jmp .finishCom
+
+.comTest:
+    jmp .finishCom
 
 .printComHelp:
     print esi
