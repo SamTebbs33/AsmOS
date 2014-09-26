@@ -27,3 +27,11 @@ first entry is volume label
 		4:0 = day
 	26:27 = first cluster of file
 	28:31 = file size
+
+
+
+
+http://bos.asmhackers.net/docs/floppy/snippet_1/FLOPPY.ASM
+http://bos.asmhackers.net/docs/memory/snippet_1/mem.asm
+http://bos.asmhackers.net/docs/floppy/snippet_6/fdc1.txt
+http://forum.osdev.org/viewtopic.php?f=1&t=13538&start=15
