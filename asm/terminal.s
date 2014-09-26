@@ -21,6 +21,8 @@ MsgDumpSpacing3: db "  ", 0x00
 
 MsgCPUBrand: db "CPU ID:",0x00
 
+MsgF32NotSupported: db "Floppy not supported", 0x00
+
 ComClear: db "clear", 0x00
     ComClearDesc: db "Clears the screen", 0x00
 ComHelp: db "help", 0x00
@@ -89,8 +91,12 @@ ComTest: db "test", 0x00
 ;**************************************************;
 
 terminal:
-    call InitSeed
     setColourClr [COLOUR_WHITE], [COLOUR_LBLUE]
+    call InitSeed
+    call F32Init
+    jc .continue
+    println MsgF32NotSupported
+    .continue:
     print MsgWelcome
     println MsgVersion
     call PrintPrompt
