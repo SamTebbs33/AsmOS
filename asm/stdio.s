@@ -58,6 +58,8 @@ COLOUR_YELLOW: db 0x0E
 COLOUR_WHITE: db 0x0F
 
 MsgHex: db "0x",0x00
+MsgTrue: db "true",0x00
+MsgFalse: db "false",0x00
 
 ;**************************************************;
 ; Macros
@@ -116,6 +118,16 @@ MsgHex: db "0x",0x00
     mov ecx, 7
     .loop:
         
+%endmacro
+
+%macro printCarry 0
+    jc .true
+    mov ebx, MsgFalse
+    jmp .done
+    .true:
+        mov ebx, MsgTrue
+    .done:
+        call PutS
 %endmacro
 
 ; setColour(text, background)

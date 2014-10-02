@@ -1,4 +1,4 @@
-%include "Floppy32.s"
+%include "floppy.s"
 
 ; ebx = buffer address
 LoadRootDir:

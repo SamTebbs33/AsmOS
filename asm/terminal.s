@@ -1,11 +1,13 @@
 jmp terminal
 
+%include "macros.s"
 %include "stdio.s"
+%include "memory.s"
 %include "string.s"
 %include "maths.s"
 %include "Files.s"
 
-MsgWelcome: db 0x0A,"Sam's OS ",0x00
+MsgWelcome: db 0x0A,  " __  __          ____    _____",0x0A,"|  \/  |        / __ \  / ____|",0x0A,"| \  / | _   _ | |  | || (___  ",0x0A,"| |\/| || | | || |  | | \___ \ ",0x0A,"| |  | || |_| || |__| | ____) |",0x0A,"|_|  |_| \__, | \____/ |_____/ ",0x0A,"          __/ |                ",0x0A,"          |___/",0x0A,0x00
 MsgVersion: db "v0.1",0x00
 Prompt: db 0x0A, "> ", 0x00
 MsgInvalidCom: db "! No command found for: ",0x00
@@ -22,13 +24,18 @@ MsgDumpSpacing3: db "  ", 0x00
 MsgCPUBrand: db "CPU ID:",0x00
 
 MsgF32NotSupported: db "Floppy not supported", 0x00
+MsgVerSpacing: db " - ", 0x00
+MsgMB: db "MB",0x00
+MsgMemMapEntries: db "Memory map entries: ",0x00
+MsgMemMapUsedBlocks: db "Used blocks: ", 0x00
+MsgMemMapFreeBlocks: db "Free blocks: ", 0x00
 
 ComClear: db "clear", 0x00
     ComClearDesc: db "Clears the screen", 0x00
 ComHelp: db "help", 0x00
     ComHelpDesc: db "Prints the help message", 0x00
-ComEcho: db "echo", 0x00
-    ComEchoDesc: db "Prints the argument", 0x00
+ComPrint: db "print", 0x00
+    ComPrintDesc: db "Prints the argument", 0x00
 ComRestart: db "restart", 0x00
     ComRestartDesc: db "Reboot the OS", 0x00
 ComVer: db "ver", 0x00
@@ -49,6 +56,8 @@ ComSys: db "sys", 0x00
     ComSysDesc: db "Prints information about the system", 0x00
 ComDir: db "ls", 0x00
     ComDirDesc: db "List the contents of the current directory", 0x00
+ComMem: db "mem", 0x00
+    ComMemDesc: db "List memory block details", 0x00
 ComTest: db "test", 0x00
     ComTestDesc: db "Does some test related shizzle", 0x00
 
@@ -91,18 +100,20 @@ ComTest: db "test", 0x00
 ;**************************************************;
 
 terminal:
-    setColourClr [COLOUR_WHITE], [COLOUR_LBLUE]
     call InitSeed
-    call F32Init
-    jc .continue
-    println MsgF32NotSupported
-    .continue:
     print MsgWelcome
-    println MsgVersion
+    print MsgVersion
+    print MsgVerSpacing
+    mov eax, dword [totalRam]
+    mov ebx, 1024
+    div ebx
+    printI eax
+    println MsgMB
     call PrintPrompt
     xor ax, ax
     xor bx, bx
     xor dx, dx
+    ;call FloppyReset
     jmp InputLoop
     ret
 
@@ -160,7 +171,7 @@ InputLoop:
 
     doCommand ComClear, .comClear
     doCommand ComHelp, .comHelp
-    doCommand ComEcho, .comEcho
+    doCommand ComPrint, .comPrint
     doCommand ComRestart, .comRestart
     doCommand ComVer, .comVer
     doCommand ComColours, .comColours
@@ -172,6 +183,7 @@ InputLoop:
     doCommand ComSys, .comSys
     doCommand ComDir, .comDir
     doCommand ComTest, .comTest
+    doCommand ComMem, .comMem
 
     mov ebx, MsgInvalidCom
     call PutS
@@ -199,7 +211,7 @@ InputLoop:
 .comHelp:
     doHelp ComClear, ComClearDesc
     doHelp ComHelp, ComHelpDesc
-    doHelp ComEcho, ComEchoDesc
+    doHelp ComPrint, ComPrintDesc
     doHelp ComRestart, ComRestartDesc
     doHelp ComVer, ComVerDesc
     doHelp ComColours, ComColoursDesc
@@ -210,10 +222,11 @@ InputLoop:
     doHelp ComRand, ComRandDesc
     doHelp ComSys, ComSysDesc
     doHelp ComDir, ComDirDesc
+    doHelp ComMem, ComMemDesc
 
     jmp .finishCom
 
-.comEcho:
+.comPrint:
     checkArgNum 1
     jnc .finishCom
     getArg 1
@@ -334,11 +347,25 @@ InputLoop:
     jmp .finishCom
 
 .comDir:
-    mov ebx, RootDirBuffer
-    call LoadRootDir
+    jmp .finishCom
+
+.comMem:
+    mov ecx, dword [bootInfoAddr]
+    mov eax, dword [ecx+40]          ; mmap length os 40th byte
+    print MsgMemMapEntries
+    printlnI eax
+    print MsgMemMapFreeBlocks
+    call MemGetFreeBlockCount
+    printlnI eax
+    print MsgMemMapUsedBlocks
+    call MemGetUsedBlockCount
+    printI eax
     jmp .finishCom
 
 .comTest:
+    xor ecx, ecx
+    xor ebx, ebx
+    ;call FloppyReadSector
     jmp .finishCom
 
 .printComHelp:
@@ -425,5 +452,3 @@ SysInfoBuffer: db 0
 times 16 db 0
 ArgAddr: db 0
 times 3 db 0
-RootDirBuffer: times 7168 db 0      ; root dir is 14 secctos * 512 bytes long
-FileBuffer: times 1025 db 0
