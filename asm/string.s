@@ -13,9 +13,9 @@
 ;       - Appends str2 to the end of str1
 ;	* StrClear(str edi)
 ;       - Clears the string
-;	* StrSetCh(str1 esi, ch bl, int eax)
+;	* StrSetChar(str1 edi, ch bl, int eax)
 ;       - Sets the character at int of str to ch
-;	* StrSetLast(str1 esi, ch bl)
+;	* StrSetLast(str1 edi, ch bl)
 ;       - Sets the last character to ch
 ;	* StrTrim(str edi)
 ;       - Trims the trailing spaces off the end of the string
@@ -31,6 +31,10 @@
 ;       - Converts the string to an integer
 ;	* StrCharIndex(str edi, char bl) -> index eax
 ;       - Returns the index of the character, or 255 if it wasn't found
+;	* StrShift(str edi, index eax)
+;       - Shifts the characters in the string from index left by one
+;   * StrReplace(str edi, char bl, char2 bh)
+;       - Replaces all occurences of char with char2
 ;--------------------------------------------------;
 
 ;**************************************************;
@@ -131,16 +135,16 @@ StrAppendCh:
         ret
 
 ;**************************************************;
-;	StrSetCh(str1 esi, ch bl, int eax)
+;	StrSetCh(str1 edi, ch bl, int eax)
 ;   Sets the character at int of str to ch
 ;**************************************************;
 
-StrSetCh:
-    mov byte [esi+eax], 0
+StrSetChar:
+    mov byte [edi+eax], 0
     ret
 
 ;**************************************************;
-;	StrSetLast(str1 esi, ch bl)
+;	StrSetLast(str1 edi, ch bl)
 ;   Sets the last character to ch
 ;**************************************************;
 
@@ -148,14 +152,14 @@ StrSetLast:
     pusha
     xor eax, eax
     .loop:
-        mov eax, [esi]
+        mov eax, [edi]
         cmp eax, 0
         je .found
         inc esi
         jmp .loop
     .found:
         dec esi
-        mov [esi], bl
+        mov [edi], bl
         popa
         ret
 
@@ -364,6 +368,44 @@ StrCharIndex:
         mov eax, ecx
     .done:
         pop bx
+        ret
+
+;**************************************************;
+;	StrShift(str edi, index eax)
+;   Shifts the characters in the string from index left by one
+;**************************************************;
+StrShiftLeft:
+    .loop:
+        mov bl, byte [edi+eax]
+        cmp bl, 0
+        je .return
+        mov byte [edi+eax-1], bl
+        inc eax
+        jmp .loop
+    .return:
+        mov byte [edi+eax-1], 0
+        ret
+
+;**************************************************;
+;	StrReplace(str edi, char bl, char2 bh)
+;   Replaces all occurences of char with char2
+;**************************************************;
+StrReplace:
+    push cx
+    push edi
+    .loop:
+        mov ch, byte [edi]
+        cmp ch, 0
+        je .return
+        cmp bl, ch
+        jne .endLoop
+        mov byte [edi], bh
+    .endLoop:
+        inc edi
+        jmp .loop
+    .return:
+        pop edi
+        pop cx
         ret
 
 ClearSplitStrs:

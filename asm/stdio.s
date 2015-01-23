@@ -13,6 +13,10 @@
 ;       - Prints the int
 ;   * SetColour(bkg al, charcol dl)
 ;       - Sets the text background and character colour
+;	* InChar() -> bl
+;		- Reads a character from the user and returns it in bl
+;	* InString() -> InputBuffer
+;		- Reads a String from the user and puts it in InputBuffer
 ;   * MoveCur(x bl, y bh)
 ;       - Moves the hardware cursor to the x and y position
 ;   * GotoXY(x bl, y bh)
@@ -39,6 +43,23 @@ ColChar: db 1
 ColBkg: db 0
 
 KeyOffset: db 0
+
+STR_BLACK: db "Black",0x00
+STR_DBLUE: db "Dark Blue",0x00
+STR_DGREEN: db "Dark Green",0x00
+STR_LTURQUOISE: db "Light Turquoise",0x00
+STR_DRED: db "Dark Red",0x00
+STR_DPURPLE: db "Dark Purple",0x00
+STR_DORANGE: db "Dark Orange",0x00
+STR_LGREY: db "Light Grey",0x00
+STR_DGREY: db "Dark Grey",0x00
+STR_LBLUE: db "Light Blue",0x00
+STR_LGREEN: db "Light Green",0x00
+STR_DTURQUOISE: db "Dark Turquoise",0x00
+STR_LRED: db "Light Red",0x00
+STR_LPURPLE: db "Light Purple",0x00
+STR_YELLOW: db "Yellow",0x00
+STR_WHITE: db "White",0x00
 
 COLOUR_BLACK: db 0x00
 COLOUR_DBLUE: db 0x01
@@ -144,7 +165,6 @@ MsgFalse: db "false",0x00
     call SetColour
     call ClrScr
 %endmacro
-
 
 ;**************************************************;
 ;	Putch32 ()
@@ -271,7 +291,7 @@ SetColour:
 	ret
 
 ;**************************************************;
-;	Puts32 ()
+;	PutS ()
 ;		- Prints a null terminated string
 ;	parm\ EBX = address of string to print
 ;**************************************************;
@@ -439,14 +459,75 @@ KeyToAscii:
         mov bl, ' '
         ret
 
+InChar:
+	.loop:
+		call WaitKey
+		call KeyToAscii
+		cmp bl, 0
+		je .loop
+		call PutCh
+		ret
+
+
+InString:
+    .loop:
+        call WaitKey
+        cmp bl, KEY_ENTER
+		je .done
+		cmp bl, KEY_BACK
+		je near .backspace
+		cmp bl, KEY_LSHIFT
+		je .shift
+		cmp bl, KEY_ALT
+		je near .alt
+;		cmp bl, KEY_LEFT
+;		je .left
+;		cmp bl, KEY_RIGHT
+;		je .right
+		cmp byte [InputPtr], 254  ; make sure the pointer is not greater than the max string length
+		je .loop
+		call KeyToAscii
+		cmp bl, 0
+		je .loop            ; if a valid ascii key was not entered, jump out
+		xor edx, edx            ; clear edx
+		mov dl, byte [InputPtr]   ; move the current buffer pointer to dl
+		dec dl                  ; decrease the pointer by one
+		mov [InputBuffer+edx], bl ; move the character to the new address (buffer + pointer)
+		inc byte [InputPtr]       ; increment the pointer
+		call PutCh
+		jmp .loop
+		
+	.done:
+		ret
+
+	.shift:
+		mov byte [KeyOffset], 42; key code offset
+		jmp .loop
+
+	.alt:
+		mov byte [KeyOffset], 84
+		jmp .loop
+
+	.backspace:
+		mov bl, byte [InputPtr]   ; move the pointer to bl
+		cmp bl, 1
+		je .loop            ; if the pointer is 1, there is not text to remove so jump out
+		dec byte [InputPtr]       ; decrement the pointer
+		call BackSpace          ; call stdio.Backspace
+		mov esi, InputBuffer
+		mov bl, 0
+		xor eax, eax
+		mov al, byte [InputPtr]
+		mov edi, InputBuffer
+		call StrShiftLeft
+		jmp .loop
+
 ;**************************************************;
 ;	MoveCur ()
 ;		- Update hardware cursor
 ;	parm/ bh = Y pos
 ;	parm/ bl = x pos
 ;**************************************************;
-
-bits 32
 
 MoveCur:
 
@@ -521,8 +602,8 @@ ClrScr:
 ;**************************************************;
 ;	GotoXY ()
 ;		- Set current X/Y location
-;	parm\	AL=X position
-;	parm\	AH=Y position
+;	parm\	bL=X position
+;	parm\	bH=Y position
 ;**************************************************;
 
 bits 32
@@ -575,6 +656,6 @@ Scroll:
         popa
         ret
 
-
-
-
+InputPtr: db 1
+InputBuffer: db 0
+times 255 db 0

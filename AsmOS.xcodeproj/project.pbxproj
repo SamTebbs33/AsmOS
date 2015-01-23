@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		F3193A0A19CB6FE00057BBBD /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; };
+		F305FCCD19EC7D1A00A5752A /* kernel.map */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = kernel.map; path = asm/kernel.map; sourceTree = "<group>"; };
+		F3193A0A19CB6FE00057BBBD /* stdio.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = stdio.s; sourceTree = "<group>"; usesTabs = 1; };
 		F3193A0C19CB6FE00057BBBD /* boot1.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = boot1.bin; sourceTree = "<group>"; };
-		F3193A0D19CB6FE00057BBBD /* kernel.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = kernel.bin; sourceTree = "<group>"; };
 		F3193A1B19CB6FE00057BBBD /* build.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		F3193A1C19CB6FE00057BBBD /* run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		F3193A1D19CB6FE00057BBBD /* sfk */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = sfk; sourceTree = "<group>"; };
@@ -39,6 +39,7 @@
 		F31939FA19CB6FB10057BBBD = {
 			isa = PBXGroup;
 			children = (
+				F305FCCD19EC7D1A00A5752A /* kernel.map */,
 				F3A0E9BA19D60F5D00F7A900 /* boot */,
 				F3B9615319CF7CEA000BC2FA /* backup.txt */,
 				F3193A0119CB6FE00057BBBD /* asm */,
@@ -71,7 +72,6 @@
 			isa = PBXGroup;
 			children = (
 				F3193A0C19CB6FE00057BBBD /* boot1.bin */,
-				F3193A0D19CB6FE00057BBBD /* kernel.bin */,
 			);
 			path = bin;
 			sourceTree = "<group>";
@@ -120,12 +120,15 @@
 		F31939FF19CB6FB10057BBBD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				Build = "";
 			};
 			name = Debug;
 		};
 		F3193A0019CB6FB10057BBBD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				Build = "";
+				"Build[arch=x86_64]" = "";
 			};
 			name = Release;
 		};

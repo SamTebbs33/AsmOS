@@ -251,7 +251,8 @@ IDT_Install:
    mov   word [_IDT_Ptr+idt_ptr.m_size], _IDT_Size - 1
    mov   dword [_IDT_Ptr+idt_ptr.m_base], _IDT
    lidt   [_IDT_Ptr]
-   sti
+   cli
+   ;sti
    ret
 
 ;***********************

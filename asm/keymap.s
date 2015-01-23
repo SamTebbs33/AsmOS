@@ -4,27 +4,27 @@ KEYS_SHIFT: db 'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'V', 'X', 
 KEYS_ALT: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '@', 0, '$', 0, 0, 92, '[', ']', 0, 0, 0, 0, 0, 0, 0, 0
 ; 42 key codes in each array above
 
-KEY_ENTER: db 28
-KEY_BACK: db 14
-KEY_RSHIFT: db 54
-KEY_LSHIFT: db 42
-KEY_TAB: db 15
-KEY_ALT: db 56
-KEY_CMD: db 92
-KEY_LEFT: db 75
-KEY_UP: db 72
-KEY_DOWN: db 80
-KEY_RIGHT: db 77
+%define KEY_ENTER  28
+%define KEY_BACK  14
+%define KEY_RSHIFT  54
+%define KEY_LSHIFT  42
+%define KEY_TAB  15
+%define KEY_ALT  56
+%define KEY_CMD  92
+%define KEY_LEFT  75
+%define KEY_UP  72
+%define KEY_DOWN  80
+%define KEY_RIGHT  77
 ; Fn must also be held down for these
-KEY_F1: db 16
-KEY_F2: db 17
-KEY_F3: db 18
-KEY_F4: db 19
-KEY_F5: db 20
-KEY_F6: db 21
-KEY_F7: db 22
-KEY_F8: db 23
-KEY_F9: db 24
-KEY_F10: db 25
-KEY_F11: db 26
-KEY_F12: db 27
+%define KEY_F1  16
+%define KEY_F2  17
+%define KEY_F3  18
+%define KEY_F4  19
+%define KEY_F5  20
+%define KEY_F6  21
+%define KEY_F7  22
+%define KEY_F8  23
+%define KEY_F9  24
+%define KEY_F10  25
+%define KEY_F11  26
+%define KEY_F12  27

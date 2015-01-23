@@ -7,13 +7,12 @@ jmp terminal
 %include "maths.s"
 %include "Files.s"
 
-MsgWelcome: db 0x0A,  " __  __          ____    _____",0x0A,"|  \/  |        / __ \  / ____|",0x0A,"| \  / | _   _ | |  | || (___  ",0x0A,"| |\/| || | | || |  | | \___ \ ",0x0A,"| |  | || |_| || |__| | ____) |",0x0A,"|_|  |_| \__, | \____/ |_____/ ",0x0A,"          __/ |                ",0x0A,"          |___/",0x0A,0x00
-MsgVersion: db "v0.1",0x00
+;MsgWelcome: db 0x0A,  " __  __          ____    _____",0x0A,"|  \/  |        / __ \  / ____|",0x0A,"| \  / | _   _ | |  | || (___  ",0x0A,"| |\/| || | | || |  | | \___ \ ",0x0A,"| |  | || |_| || |__| | ____) |",0x0A,"|_|  |_| \__, | \____/ |_____/ ",0x0A,"          __/ |                ",0x0A,"          |___/",0x0A,0x00
+MsgWelcome: db "Sam's OS - v0.1", 0x00
 Prompt: db 0x0A, "> ", 0x00
 MsgInvalidCom: db "! No command found for: ",0x00
 MsgText: db "Text: ",0x00
 MsgBkg: db "Background: ",0x00
-MsgShift: db 0x0A, "Shift!",0x0A,0x00
 
 MsgComDesc: db ": ", 0x00
 MsgDumpStart: db "Start: ", 0x00
@@ -21,11 +20,12 @@ MsgDumpSpacing1: db "    ", 0x00
 MsgDumpSpacing2: db " ", 0x00
 MsgDumpSpacing3: db "  ", 0x00
 
-MsgCPUBrand: db "CPU ID:",0x00
+MsgCPUBrand: db "CPU:",0x00
+MsgTest: db "aaaabbbb",0x00
 
 MsgF32NotSupported: db "Floppy not supported", 0x00
 MsgVerSpacing: db " - ", 0x00
-MsgMB: db "MB",0x00
+MsgMB: db "MB RAM",0x00
 MsgMemMapEntries: db "Memory map entries: ",0x00
 MsgMemMapUsedBlocks: db "Used blocks: ", 0x00
 MsgMemMapFreeBlocks: db "Free blocks: ", 0x00
@@ -40,8 +40,6 @@ ComRestart: db "restart", 0x00
     ComRestartDesc: db "Reboot the OS", 0x00
 ComVer: db "ver", 0x00
     ComVerDesc: db "Show the OS version", 0x00
-ComColours: db "colours", 0x00
-    ComColoursDesc: db "Show the current colour cofiguration", 0x00
 ComCol: db "col", 0x00
     ComColDesc: db "Cycle through the text colours", 0x00
 ComBkg: db "bkg", 0x00
@@ -101,12 +99,13 @@ ComTest: db "test", 0x00
 
 terminal:
     call InitSeed
+    call PutL
     print MsgWelcome
-    print MsgVersion
-    print MsgVerSpacing
+    call PutL
     mov eax, dword [totalRam]
     mov ebx, 1024
     div ebx
+    mov dword [totalRam], eax
     printI eax
     println MsgMB
     call PrintPrompt
@@ -118,50 +117,9 @@ terminal:
     ret
 
 InputLoop:
-    call WaitKey
-    cmp bl, byte [KEY_ENTER]
-    je near .enter
-    cmp bl, byte [KEY_BACK]
-    je .backspace
-    cmp bl, byte [KEY_LSHIFT]
-    je .shift
-    cmp bl, byte [KEY_ALT]
-    je .alt
-    cmp byte [ComPtr], 254  ; make sure the pointer is not greater than the max string length
-    je InputLoop
-    call KeyToAscii
-    cmp bl, 0
-    je InputLoop            ; if a valid ascii key was not entered, jump out
-    xor edx, edx            ; clear edx
-    mov dl, byte [ComPtr]   ; move the current buffer pointer to dl
-    dec dl                  ; decrease the pointer by one
-    mov [ComBuffer+edx], bl ; move the character to the new address (buffer + pointer)
-    inc byte [ComPtr]       ; increment the pointer
-    call PutCh
-    jmp InputLoop
-
-.shift:
-    mov byte [KeyOffset], 42; key code offset
-    jmp InputLoop
-
-.alt:
-    mov byte [KeyOffset], 84
-    jmp InputLoop
-
-.backspace:
-    mov bl, byte [ComPtr]   ; move the pointer to bl
-    cmp bl, 1
-    je InputLoop            ; if the pointer is 1, there is not text to remove so jump out
-    dec byte [ComPtr]       ; decrement the pointer
-    call BackSpace          ; call stdio.Backspace
-    mov esi, ComBuffer
-    mov bl, 0
-    call StrSetLast         ; removes the last character of the buffer
-    jmp InputLoop
-
-.enter:
+    call InString
     call PutL
-    mov edi, ComBuffer
+    mov edi, InputBuffer
     cmp byte [edi], 0       ; if no text was entered, jump back
     je near .finishCom
     call StrTrim
@@ -174,7 +132,6 @@ InputLoop:
     doCommand ComPrint, .comPrint
     doCommand ComRestart, .comRestart
     doCommand ComVer, .comVer
-    doCommand ComColours, .comColours
     doCommand ComCol, .comCol
     doCommand ComBkg, .comBkg
     doCommand ComDump, .comDump
@@ -193,14 +150,14 @@ InputLoop:
 
 .finishCom
     call ClearSplitStrs
-    mov edi, LastCom
-    mov esi, ComBuffer
-    call StrClear           ; clears the previous command
-    xchg esi, edi
-    call StrCopy            ; copies the command to the previous command
-    mov edi, ComBuffer
+    ;mov edi, LastCom
+    ;mov esi, InputBuffer
+    ;call StrClear           ; clears the previous command
+    ;xchg esi, edi
+    ;call StrCopy            ; copies the command to the previous command
+    mov edi, InputBuffer
     call StrClear           ; clears the command
-    mov byte [ComPtr], 1    ; resets the pointer
+    mov byte [InputPtr], 1    ; resets the pointer
     call PrintPrompt
     jmp InputLoop
 
@@ -214,7 +171,6 @@ InputLoop:
     doHelp ComPrint, ComPrintDesc
     doHelp ComRestart, ComRestartDesc
     doHelp ComVer, ComVerDesc
-    doHelp ComColours, ComColoursDesc
     doHelp ComCol, ComColDesc
     doHelp ComBkg, ComBkgDesc
     doHelp ComDump, ComDumpDesc
@@ -238,27 +194,18 @@ InputLoop:
 	out        64h, al
 
 .comVer:
-    print MsgVersion
-    jmp .finishCom
-
-.comColours:
-    xor eax, eax
-    print MsgText
-    printlnH byte [ColChar]
-    print MsgBkg
-    printH byte [ColBkg]
+    print MsgWelcome
     jmp .finishCom
 
 .comCol:
-    mov dl, byte [ColChar]
-    inc dl
+    getArgI 1
+    mov dl, al
     and dl, 15
     setColourClr dl, byte [ColBkg]
     jmp .finishCom
 
 .comBkg:
-    mov al, byte [ColBkg]
-    inc al
+    getArgI 1
     and al, 15
     setColourClr byte [ColChar], al
     jmp .finishCom
@@ -343,6 +290,10 @@ InputLoop:
     mov eax, 80000004h
     cpuid
     call PrintCPUId
+    ; print RAM
+    call PutL
+    printI dword [totalRam]
+    print MsgMB
     popa
     jmp .finishCom
 
@@ -363,9 +314,11 @@ InputLoop:
     jmp .finishCom
 
 .comTest:
-    xor ecx, ecx
-    xor ebx, ebx
-    ;call FloppyReadSector
+    mov edi, MsgTest
+    mov bh, 'e'
+    mov bl, 'a'
+    call StrReplace
+    println MsgTest
     jmp .finishCom
 
 .printComHelp:
@@ -443,12 +396,7 @@ CpuIdSupported:
     popfd ; restore original flags
     ret
 
-ComBuffer: db 0
-times 255 db 0
 LastCom: db 0
 times 255 db 0
-ComPtr: db 1
 SysInfoBuffer: db 0
 times 16 db 0
-ArgAddr: db 0
-times 3 db 0
